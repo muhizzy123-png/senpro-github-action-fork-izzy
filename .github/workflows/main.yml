@@ -1,4 +1,5 @@
 name: Test, Build and Deploy | Modul 01 - Lab2.2 Senior Project
+# This workflow will test, build and deploy the project to the VM server.
 
 on:
   push:
