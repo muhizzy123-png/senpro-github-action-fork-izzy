@@ -27,10 +27,6 @@ jobs:
     needs: test-build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-    
     steps:
       - name: Build app on VM
         uses: appleboy/ssh-action@master
@@ -38,27 +34,37 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }} 
+          port: ${{ secrets.PORT }}
+
           script: |
-            eval "$(ssh-agent -s)"
-            ssh-add ~/.ssh/ssh-praktikan22
             echo "Cek folder project"
-            [ ! -d "${HOME}/senpro/537712/modul02/senpro-github-action-fork-izzy/" ] &&
-              {
-                echo "Repository belum di-clone. Cloning...";
-                mkdir -p ~/senpro/537712/modul02;
-                cd ~/senpro/537712/modul02;
-                git clone https://github.com/muhizzy123-png/senpro-github-action-fork-izzy;
-                echo "Install Package dan Build Project";
-                npm install;
-                npm run build;
-              } ||
-              {
-                echo "Repository sudah ada. Building...";
-                cd ~/senpro/537712/modul02/senpro-github-action;
-                git restore .;
-                git pull origin main;
-                echo "Install Package dan Build Project";
-                npm install;
-                npm run build;
-              }
+
+            PROJECT_DIR="${HOME}/senpro/537712/modul02/senpro-github-action-fork-izzy"
+
+            if [ ! -d "$PROJECT_DIR/.git" ]; then
+              echo "Repository belum ada. Cloning..."
+
+              mkdir -p "${HOME}/senpro/537712/modul02"
+              cd "${HOME}/senpro/537712/modul02"
+
+              git clone https://github.com/muhizzy123-png/senpro-github-action-fork-izzy.git
+
+            else
+              echo "Repository sudah ada. Updating..."
+
+              cd "$PROJECT_DIR"
+
+              git restore .
+              git pull origin main
+            fi
+
+            echo "Masuk ke folder project..."
+            cd "$PROJECT_DIR"
+
+            echo "Install Package..."
+            npm install
+
+            echo "Build Project..."
+            npm run build
+
+            echo "Build selesai!"
